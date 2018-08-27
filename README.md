@@ -1,7 +1,7 @@
 # react-native
 React Native projects and components
 
-## LoginFacebook
+## FacebookLogin
 
 Login Facebook test with `Expo.Facebook.logInWithReadPermissionsAsync`
 
