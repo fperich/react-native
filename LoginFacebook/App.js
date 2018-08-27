@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { 
-	View, Alert, Button, Text, StyleSheet, TouchableOpacity, Image, AsyncStorage
+import {
+	View, Text, StyleSheet, TouchableOpacity, Image, AsyncStorage
 } from 'react-native';
 
 export default class HomeScreen extends Component {
@@ -11,54 +11,65 @@ export default class HomeScreen extends Component {
 		this.state = {
 			user: null
 		}
-	}
 
-	componentDidMount(){
-		var self = this;
 
-		AsyncStorage.getItem('fbtoken').then((result) => self.token = result )
-
-		AsyncStorage.getItem('user').then((result) => self.setState({ user: result}))
-			
 	}
 
 	async login() {
 		var APPID = '323285108099652';
 
 		const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync(APPID, {
-			permissions: ['public_profile', 'email', 'user_friends'], // public_profile, email, user_friends
-			behavior: 'system' // web, native, browser, system
+			permissions: ['public_profile', 'email'], // public_profile, email, user_friends
+			behavior: 'web' // web, native, browser, system (only web is permitted in Expo)
 		});
 
 		if (type === 'success') {
-			AsyncStorage.setItem('fbtoken', token);
 
 			// Get the user's name using Facebook's Graph API
-			const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
-
-			const user = (await response.json())
-			console.log('user', user);
-			
-			AsyncStorage.setItem('user', JSON.stringify(user));
+			const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large)`);
+			const user = await response.json()
 
 			this.setState({
-				user: user
+				user
 			});
 		}
 	}
-	
+
+	testAgain() {
+		this.setState({
+			user: null
+		});
+	}
+
+	renderUserInfo() {
+		console.log('this.state.user', this.state.user);
+
+		const user = this.state.user;
+		const picture = user.picture.data.url;
+
+		return (
+			<View style={{ alignItems: 'center' }}>
+				<Image source={{ uri: picture }} style={{ width: 200, height: 200 }} />
+				<Text style={styles.name}>{user.name}</Text>
+
+				<Text style={styles.button} onPress={() => this.testAgain()}>
+					Let's test it agagin
+        		</Text>
+			</View>
+		)
+	}
+
 	render() {
+
 		return (
 			<View style={styles.container} >
 				{
-					this.state.user === null ?
-						<TouchableOpacity onPress={ () => this.login() }>
-					      	<Image source={require('./assets/images/facebook.png')} />
-					    </TouchableOpacity>
+					!this.state.user ?
+						<TouchableOpacity onPress={() => this.login()}>
+							<Image source={require('./assets/images/facebook.png')} />
+						</TouchableOpacity>
 					:
-						<View>
-							<Text>Welcome { this.state.user.name }!</Text>							
-						</View>
+						this.renderUserInfo()
 				}
 			</View>
 		);
@@ -66,19 +77,21 @@ export default class HomeScreen extends Component {
 }
 
 var styles = StyleSheet.create({
-		container: {
-			padding: 30,
-			flex: 1,
-			justifyContent: "center",
-			alignItems: "center",
-			backgroundColor: "#F5FCFF",
-		},
-		button: {
-			padding: 10,
-			justifyContent: "center",
-			backgroundColor: "#FF0000",
-			borderColor: '#0000FF',
-			borderWidth: 1,
-    		borderRadius: 10,
-		}
+	container: {
+		padding: 30,
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "#F5FCFF",
+	},
+	name: {
+		fontSize: 20
+	},
+	button: {
+		marginTop: 50,
+		padding: 10,
+		justifyContent: "center",
+		color: 'blue',
+		fontSize: 20
+	}
 });
