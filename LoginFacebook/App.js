@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-	View, Text, StyleSheet, TouchableOpacity, Image, AsyncStorage
+	View, Text, StyleSheet, TouchableOpacity, Image
 } from 'react-native';
 
 export default class HomeScreen extends Component {
@@ -11,12 +11,10 @@ export default class HomeScreen extends Component {
 		this.state = {
 			user: null
 		}
-
-
 	}
 
 	async login() {
-		var APPID = '323285108099652';
+		var APPID = 'YOUR APP ID';
 
 		const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync(APPID, {
 			permissions: ['public_profile', 'email'], // public_profile, email, user_friends
